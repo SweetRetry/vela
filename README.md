@@ -1,73 +1,17 @@
-# vela
+# VELA
 
-A modern monorepo template powered by **Turborepo**, **Next.js**, **shadcn/ui**, **Biome**, and **Knip**.
+> 图像是正面，prompt 是背面。
 
-## What's Inside
+VELA 是一份 AI 视觉作品档案。
 
-### Apps
+每件作品都将最终图像与促成它的原始生成指令并置保存：正面观看画面，背面阅读构图、
+材质、光色与叙事意图。这里记录的不只是结果，也包括一幅图像如何被描述、约束与生成。
 
-- `apps/web` - Next.js 16 application with App Router and Turbopack
+[进入 VELA](https://sweetretry.github.io/vela/)
 
-### Packages
+## Archive
 
-- `packages/ui` - Shared React component library with shadcn/ui
-- `packages/typescript-config` - Shared TypeScript configurations
-
-### Tools
-
-- [Turborepo](https://turbo.build/repo) - High-performance build system
-- [Biome](https://biomejs.dev) - Fast formatter and linter
-- [Knip](https://knip.dev) - Find unused files, dependencies and exports
-- [pnpm](https://pnpm.io) - Fast, disk space efficient package manager
-
-## Getting Started
-
-```bash
-# Install dependencies
-pnpm install
-
-# Start development server
-pnpm dev
-
-# Build all apps and packages
-pnpm build
-
-# Lint and format code
-pnpm check
-
-# Find unused code
-pnpm knip
-```
-
-## Adding UI Components
-
-To add shadcn/ui components, run at the project root:
-
-```bash
-pnpm dlx shadcn@latest add button -c apps/web
-```
-
-Components will be placed in `packages/ui/src/components`.
-
-## Using Components
-
-Import components from the `@workspace/ui` package:
-
-```tsx
-import { Button } from "@workspace/ui/components/button"
-```
-
-## Project Structure
-
-```
-.
-├── apps/
-│   └── web/                 # Next.js application
-├── packages/
-│   ├── ui/                  # Shared UI components
-│   └── typescript-config/   # Shared TS configs
-├── biome.json               # Biome configuration
-├── knip.json                # Knip configuration
-├── turbo.json               # Turborepo configuration
-└── pnpm-workspace.yaml      # pnpm workspace config
-```
+| 001 | 002 |
+| :--- | :--- |
+| [![挣脱盛放](apps/web/public/works/unbound-bloom.webp)](https://sweetretry.github.io/vela/#unbound-bloom) | [![无根](apps/web/public/works/rootless-tiger.webp)](https://sweetretry.github.io/vela/#rootless) |
+| **挣脱盛放 · UNBOUND BLOOM**<br>从紧束的深绿根部向外爆发。花冠不是被摆放的静物，而是一股正在越过画框的生命冲动。 | **无根 · ROOTLESS**<br>猛虎从上方压迫画面，武士以低姿态横棍迎击。暖棕、墨黑与局部朱红把空间压缩成一记正在爆发的水墨笔触。 |
