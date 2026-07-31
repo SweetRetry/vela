@@ -18,6 +18,11 @@ export type Artwork = {
   media: ArtworkMedia
 }
 
+/** public 资源不会由 Next.js 自动补 basePath，构建时在数据源统一生成部署路径 */
+function publicAsset(path: `/${string}`) {
+  return `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path}`
+}
+
 export const artworks = [
   {
     id: "001",
@@ -30,7 +35,7 @@ export const artworks = [
     tone: "light",
     media: {
       kind: "image",
-      src: "/works/unbound-bloom.webp",
+      src: publicAsset("/works/unbound-bloom.webp"),
       alt: "暖白背景上，一束珊瑚红、洋红与橙色花朵从深绿色茎叶中向外舒展",
     },
     originalPrompt: `## 平面核心
@@ -67,7 +72,7 @@ export const artworks = [
     tone: "dark",
     media: {
       kind: "image",
-      src: "/works/rootless-tiger.webp",
+      src: publicAsset("/works/rootless-tiger.webp"),
       alt: "水墨飞溅的暖棕空间里，持棍武士背对画面，与上方扑压而来的巨虎对峙",
     },
     originalPrompt: `## 整体风格
@@ -105,7 +110,7 @@ export const artworks = [
     tone: "light",
     media: {
       kind: "image",
-      src: "/works/refraction.webp",
+      src: publicAsset("/works/refraction.webp"),
       alt: "暖象牙色纸面上，一颗由冰蓝与淡紫水彩叠染、精细墨线勾勒切面的钻石",
     },
     originalPrompt: `stylized-concept
@@ -131,7 +136,7 @@ Constraints: no text, no logo, no watermark, no border, no photorealistic studio
     tone: "light",
     media: {
       kind: "image",
-      src: "/works/verdant-notes.webp",
+      src: publicAsset("/works/verdant-notes.webp"),
       alt: "暖白水彩纸上，蕨叶、圆叶桉与细碎白花交叠成一束舒展的绿色植物",
     },
     originalPrompt: `## 档案说明
