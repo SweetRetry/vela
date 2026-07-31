@@ -11,13 +11,15 @@ export type Artwork = {
   originalPrompt: string
 }
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
+
 export const artworks = [
   {
     id: "001",
     slug: "unbound-bloom",
     title: "挣脱盛放",
     englishTitle: "UNBOUND BLOOM",
-    image: "/works/unbound-bloom.webp",
+    image: `${basePath}/works/unbound-bloom.webp`,
     alt: "暖白背景上，一束珊瑚红、洋红与橙色花朵从深绿色茎叶中向外舒展",
     time: "2026/07/31",
     dimensions: "3840 × 2160 px",
@@ -49,7 +51,7 @@ export const artworks = [
     slug: "rootless",
     title: "无根",
     englishTitle: "ROOTLESS",
-    image: "/works/rootless-tiger.webp",
+    image: `${basePath}/works/rootless-tiger.webp`,
     alt: "水墨飞溅的暖棕空间里，持棍武士背对画面，与上方扑压而来的巨虎对峙",
     time: "2026/07/31",
     dimensions: "3840 × 2160 px",
@@ -73,7 +75,7 @@ export const artworks = [
 
 ## 镜头与构图
 
-9:16 竖幅，极低视角仰拍，采用具有强烈张力的对角线构图。
+16:9 横幅，极低视角仰拍，采用具有强烈张力的对角线构图。
 
 ## 画面质感
 
