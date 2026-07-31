@@ -119,4 +119,23 @@ Color/value: luminous near-white highlights, cool translucent blues and lavender
 Rendering: compressed depth and simplified illustrative light; faceted volume remains convincing through watercolor value shifts and fine ink geometry. Elegant, tactile, hand-rendered, editorial poster quality. Preserve organic watercolor texture and precise drawing detail.
 Constraints: no text, no logo, no watermark, no border, no photorealistic studio lighting, no black background, no clean-vector flat fills, no minimalist abstract blocks.`,
   },
+  {
+    id: "004",
+    slug: "verdant-notes",
+    title: "林野札记",
+    englishTitle: "VERDANT NOTES",
+    time: "2026/07/31",
+    dimensions: "3840 × 2160 px",
+    summary:
+      "蕨叶、桉枝与细碎白花在暖白棉纸上舒展，透明水色把一束林野植物留成轻盈、安静的纸上札记。",
+    tone: "light",
+    media: {
+      kind: "image",
+      src: "/works/verdant-notes.webp",
+      alt: "暖白水彩纸上，蕨叶、圆叶桉与细碎白花交叠成一束舒展的绿色植物",
+    },
+    originalPrompt: `## 档案说明
+
+原始 prompt 未随作品提供。`,
+  },
 ] as const satisfies readonly Artwork[]
