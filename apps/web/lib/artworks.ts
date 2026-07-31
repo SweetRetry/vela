@@ -9,6 +9,8 @@ export type Artwork = {
   dimensions: string
   summary: string
   originalPrompt: string
+  /** 画面主色调，决定叠加在作品上的文字与控件用墨黑还是暖白 */
+  tone: "light" | "dark"
 }
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
@@ -24,6 +26,7 @@ export const artworks = [
     time: "2026/07/31",
     dimensions: "3840 × 2160 px",
     summary: "从紧束的深绿根部向外爆发。花冠不是被摆放的静物，而是一股正在越过画框的生命冲动。",
+    tone: "light",
     originalPrompt: `## 平面核心
 
 设计主轴：一束花像刚刚挣脱束缚的生命体，从紧束的根部向四周猛烈舒展；饱满花冠形成上升的火焰轮廓，一枝细长花茎越过整体节奏向右上方探出，成为充满生命冲动的记忆点。
@@ -57,6 +60,7 @@ export const artworks = [
     dimensions: "3840 × 2160 px",
     summary:
       "猛虎从上方压迫画面，武士以低姿态横棍迎击。暖棕、墨黑与局部朱红把空间压缩成一记正在爆发的水墨笔触。",
+    tone: "dark",
     originalPrompt: `## 整体风格
 
 东方写意水墨数字插画。以低饱和暖棕、黑白灰为主色调，局部使用朱红点缀。强烈的后方逆光，明暗对比鲜明。

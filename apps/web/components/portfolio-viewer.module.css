@@ -1,0 +1,202 @@
+.viewer {
+  position: relative;
+  min-width: 320px;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+/* 明调作品：界面用墨黑，像印在暖白纸面上 */
+.toneLight {
+  --ink: oklch(0.17 0.012 74);
+  --ink-soft: oklch(0.17 0.012 74 / 0.72);
+  --paper: oklch(0.965 0.014 88);
+  --hairline: oklch(0.17 0.012 74 / 0.38);
+  --veil: oklch(0.965 0.014 88 / 0.5);
+  --scrim-top: linear-gradient(to bottom, oklch(0.965 0.014 88 / 0.62), oklch(0.965 0.014 88 / 0));
+  --scrim-bottom: linear-gradient(to top, oklch(0.965 0.014 88 / 0.8), oklch(0.965 0.014 88 / 0));
+  --scrim-side: linear-gradient(to left, oklch(0.965 0.014 88 / 0.55), oklch(0.965 0.014 88 / 0));
+}
+
+/* 暗调作品：界面用暖白，像裱进深色画匣 */
+.toneDark {
+  --ink: oklch(0.95 0.02 90);
+  --ink-soft: oklch(0.95 0.02 90 / 0.72);
+  --paper: oklch(0.19 0.015 70);
+  --hairline: oklch(0.95 0.02 90 / 0.38);
+  --veil: oklch(0.19 0.015 70 / 0.42);
+  --scrim-top: linear-gradient(to bottom, oklch(0.19 0.015 70 / 0.62), oklch(0.19 0.015 70 / 0));
+  --scrim-bottom: linear-gradient(to top, oklch(0.19 0.015 70 / 0.8), oklch(0.19 0.015 70 / 0));
+  --scrim-side: linear-gradient(to left, oklch(0.19 0.015 70 / 0.55), oklch(0.19 0.015 70 / 0));
+}
+
+/* 环境底：作品自身放大模糊，填满画幅之外的空白 */
+.backdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.backdropImage {
+  object-fit: cover;
+  filter: blur(56px) saturate(1.15);
+  transform: scale(1.25);
+}
+
+.backdropVeil {
+  position: absolute;
+  inset: 0;
+  background: var(--veil);
+}
+
+/* 作品层：切换时从画面中心"洇开" */
+.stage {
+  position: absolute;
+  inset: 0;
+  animation: ink-in 720ms cubic-bezier(0.22, 0.7, 0.2, 1) both;
+}
+
+.scrimTop,
+.scrimBottom,
+.scrimSide {
+  position: absolute;
+  pointer-events: none;
+}
+
+.scrimTop {
+  inset: 0 0 auto;
+  height: 22%;
+  background: var(--scrim-top);
+}
+
+.scrimBottom {
+  inset: auto 0 0;
+  height: 38%;
+  background: var(--scrim-bottom);
+}
+
+.scrimSide {
+  inset: 0 0 0 auto;
+  width: 32%;
+  background: var(--scrim-side);
+}
+
+.serif {
+  font-family: Georgia, "Times New Roman", "Songti SC", serif;
+}
+
+/* 题款：竖排中文标题，落在画面边缘 */
+.verticalTitle {
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 24px var(--veil);
+  writing-mode: vertical-rl;
+}
+
+/* 印章：作品编号钤在角落 */
+.seal {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  background: var(--color-primary);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.22);
+  color: oklch(0.97 0.012 90);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-indent: 0.1em;
+}
+
+/* Verso：画的背面，暖纸色满版阅读层 */
+.verso {
+  width: 100vw;
+  max-width: none;
+  height: 100svh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--color-secondary);
+  color: var(--color-foreground);
+}
+
+.verso::backdrop {
+  background: rgb(24 20 16 / 0.55);
+}
+
+.verso[open] {
+  animation: layer-in 300ms ease-out;
+}
+
+/* Index：档案抽屉，深色满版列表 */
+.indexDialog {
+  width: 100vw;
+  max-width: none;
+  height: 100svh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: oklch(0.16 0.012 70);
+  color: oklch(0.93 0.015 90);
+}
+
+.indexDialog::backdrop {
+  background: rgb(24 20 16 / 0.55);
+}
+
+.indexDialog[open] {
+  animation: layer-in 300ms ease-out;
+}
+
+.scrollBody {
+  scrollbar-color: var(--color-border) transparent;
+  scrollbar-width: thin;
+}
+
+.scrollBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollBody::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollBody::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+}
+
+@keyframes ink-in {
+  from {
+    opacity: 0;
+    clip-path: circle(22% at 50% 46%);
+    filter: blur(12px);
+  }
+
+  to {
+    opacity: 1;
+    clip-path: circle(100% at 50% 46%);
+    filter: blur(0);
+  }
+}
+
+@keyframes layer-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage,
+  .verso[open],
+  .indexDialog[open] {
+    animation: none;
+  }
+}

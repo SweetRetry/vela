@@ -1,13 +1,18 @@
 "use client"
 
-import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
-import { ArrowLeft, ArrowRight, X } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
 
-import { ArtworkSlice } from "@/components/artwork-slice"
+import { ArtworkIndex } from "@/components/artwork-index"
+import { ArtworkVerso } from "@/components/artwork-verso"
 import type { Artwork } from "@/lib/artworks"
+
+import styles from "./portfolio-viewer.module.css"
+
+const chromeButton =
+  "inline-flex h-9 cursor-pointer items-center gap-1.5 border border-(--hairline) bg-transparent px-3 font-mono text-[10px] uppercase tracking-[0.12em] text-(--ink) transition-colors hover:bg-(--ink) hover:text-(--paper) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--ink)"
 
 type PortfolioViewerProps = {
   artworks: readonly Artwork[]
@@ -15,7 +20,8 @@ type PortfolioViewerProps = {
 
 export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
   const [activeIndex, setActiveIndex] = useState(0)
-  const artworkDialogRef = useRef<HTMLDialogElement>(null)
+  const versoRef = useRef<HTMLDialogElement>(null)
+  const indexRef = useRef<HTMLDialogElement>(null)
   const activeArtwork = artworks[activeIndex]
 
   const selectArtwork = useCallback(
@@ -47,12 +53,23 @@ export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowLeft") {
-        selectArtwork(activeIndex - 1)
+      if (event.metaKey || event.ctrlKey || event.altKey) {
+        return
       }
 
-      if (event.key === "ArrowRight") {
+      // 阅读层打开时，方向键留给滚动与 Esc
+      if (versoRef.current?.open || indexRef.current?.open) {
+        return
+      }
+
+      if (event.key === "ArrowLeft") {
+        selectArtwork(activeIndex - 1)
+      } else if (event.key === "ArrowRight") {
         selectArtwork(activeIndex + 1)
+      } else if (event.key === "i" || event.key === "I") {
+        indexRef.current?.showModal()
+      } else if (event.key === "p" || event.key === "P") {
+        versoRef.current?.showModal()
       }
     }
 
@@ -61,120 +78,152 @@ export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
   }, [activeIndex, selectArtwork])
 
   if (!activeArtwork) {
-    return null
+    return (
+      <div className="grid h-svh place-items-center bg-background text-muted-foreground text-sm">
+        档案暂无作品。
+      </div>
+    )
   }
 
+  const isFirst = activeIndex === 0
+  const isLast = activeIndex === artworks.length - 1
+  const previousArtwork = artworks[activeIndex - 1]
+  const nextArtwork = artworks[activeIndex + 1]
+  const toneClass = activeArtwork.tone === "dark" ? styles.toneDark : styles.toneLight
+
   return (
-    <div className="flex min-h-svh min-w-80 flex-col overflow-x-clip bg-background text-foreground">
-      <header className="grid min-h-16 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-border border-b bg-background px-4 md:px-8">
+    <div className={cn(styles.viewer, toneClass)}>
+      {/* 环境底：作品自身放大模糊，填满画幅之外的空白 */}
+      <div className={styles.backdrop} aria-hidden="true">
+        <Image
+          key={`backdrop-${activeArtwork.id}`}
+          src={activeArtwork.image}
+          alt=""
+          fill
+          sizes="100vw"
+          className={styles.backdropImage}
+        />
+        <div className={styles.backdropVeil} />
+      </div>
+
+      {/* 作品层：key 触发"洇开"转场 */}
+      <figure key={activeArtwork.id} className={styles.stage}>
+        <Image
+          src={activeArtwork.image}
+          alt={activeArtwork.alt}
+          fill
+          priority
+          sizes="100vw"
+          className="object-contain"
+        />
+      </figure>
+
+      <div className={styles.scrimTop} aria-hidden="true" />
+      <div className={styles.scrimBottom} aria-hidden="true" />
+      <div className={styles.scrimSide} aria-hidden="true" />
+
+      {/* 顶栏 */}
+      <header className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-5 py-4 md:px-8">
         <button
-          className="w-max cursor-pointer border-0 bg-transparent p-0 font-bold text-[21px] tracking-[-0.06em]"
+          className="cursor-pointer border-0 bg-transparent p-0 font-bold text-[21px] text-(--ink) tracking-[-0.06em] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--ink)"
           type="button"
           onClick={() => selectArtwork(0)}
           aria-label="返回第一件作品"
         >
           VELA
         </button>
-        <p className="hidden font-mono text-[11px] tracking-[0.13em] sm:block">AI VISUAL ARCHIVE</p>
-        <span aria-hidden="true" />
+        <div className="flex items-center gap-3">
+          <span className="hidden font-mono text-[10px] text-(--ink-soft) tracking-[0.14em] sm:inline">
+            {activeArtwork.id} / {String(artworks.length).padStart(3, "0")}
+          </span>
+          <button
+            className={chromeButton}
+            type="button"
+            onClick={() => indexRef.current?.showModal()}
+          >
+            索引
+          </button>
+          <button
+            className={chromeButton}
+            type="button"
+            onClick={() => versoRef.current?.showModal()}
+          >
+            配方
+          </button>
+        </div>
       </header>
 
-      <main className="flex flex-1 flex-col">
-        <ArtworkSlice
-          key={activeArtwork.id}
-          artwork={activeArtwork}
-          priority={activeIndex === 0}
-          onOpenArtwork={() => artworkDialogRef.current?.showModal()}
-        />
+      {/* 题款：竖排标题落在画面右缘 */}
+      <div className="pointer-events-none absolute top-1/2 right-5 z-10 -translate-y-1/2 md:right-10">
+        <h1
+          className={cn(
+            styles.verticalTitle,
+            styles.serif,
+            "text-[clamp(48px,10vh,96px)] text-(--ink)"
+          )}
+        >
+          {activeArtwork.title}
+        </h1>
+      </div>
 
-        <nav
-          className="flex flex-1 items-center border-border border-t bg-secondary/20 px-4 py-3 md:px-8"
-          aria-label="作品快速索引"
-        >
-          <div className="flex w-full gap-2 overflow-x-auto py-1">
-            {artworks.map((artwork, index) => {
-              const isActive = index === activeIndex
-
-              return (
-                <Button
-                  className={cn(
-                    "h-auto min-w-48 justify-start gap-3 rounded-none border border-border p-2 text-left shadow-none hover:bg-accent hover:text-accent-foreground",
-                    isActive &&
-                      "border-primary bg-primary/10 text-foreground hover:border-primary hover:bg-primary/15 hover:text-foreground dark:bg-primary/15 dark:hover:bg-primary/20"
-                  )}
-                  variant="ghost"
-                  type="button"
-                  aria-pressed={isActive}
-                  aria-label={`查看作品 ${index + 1}/${artworks.length}：${artwork.title}`}
-                  onClick={() => selectArtwork(index)}
-                  key={artwork.id}
-                >
-                  <span className="relative block aspect-video w-20 shrink-0 overflow-hidden bg-secondary">
-                    <Image src={artwork.image} alt="" fill sizes="80px" className="object-cover" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-xs">{artwork.title}</span>
-                  </span>
-                </Button>
-              )
-            })}
-          </div>
-        </nav>
-      </main>
-
-      <dialog
-        ref={artworkDialogRef}
-        className="m-0 h-svh max-h-none w-screen max-w-none bg-foreground p-0 text-background backdrop:bg-foreground"
-        aria-label={`${activeArtwork.title} 全屏图像`}
-        onClick={(event) => {
-          if (event.target === event.currentTarget) {
-            event.currentTarget.close()
-          }
-        }}
-      >
-        <div className="absolute inset-x-0 top-16 bottom-16 md:inset-12">
-          <Image
-            src={activeArtwork.image}
-            alt={activeArtwork.alt}
-            fill
-            sizes="100vw"
-            className="object-contain"
-          />
-        </div>
-        <Button
-          className="absolute top-4 right-4 z-10 size-11 rounded-full border-background/40 bg-foreground/70 text-background hover:bg-background hover:text-foreground"
-          variant="outline"
-          size="icon"
-          type="button"
-          onClick={() => artworkDialogRef.current?.close()}
-          aria-label="关闭全屏图像"
-        >
-          <X aria-hidden="true" />
-        </Button>
-        <Button
-          className="absolute bottom-3 left-4 h-11 rounded-none bg-transparent text-background hover:bg-background hover:text-foreground md:top-1/2 md:bottom-auto md:left-5 md:-translate-y-1/2"
-          variant="ghost"
-          type="button"
-          disabled={activeIndex === 0}
-          onClick={() => selectArtwork(activeIndex - 1)}
-        >
-          <ArrowLeft aria-hidden="true" />
-          <span className="md:hidden">上一件</span>
-        </Button>
-        <Button
-          className="absolute right-4 bottom-3 h-11 rounded-none bg-transparent text-background hover:bg-background hover:text-foreground md:top-1/2 md:right-5 md:bottom-auto md:-translate-y-1/2"
-          variant="ghost"
-          type="button"
-          disabled={activeIndex === artworks.length - 1}
-          onClick={() => selectArtwork(activeIndex + 1)}
-        >
-          <span className="md:hidden">下一件</span>
-          <ArrowRight aria-hidden="true" />
-        </Button>
-        <p className="absolute bottom-5 left-1/2 -translate-x-1/2 font-mono text-[10px] tracking-[0.08em]">
-          {activeArtwork.id} · {activeArtwork.englishTitle}
+      {/* 题跋：英文名、述要、时间尺寸 */}
+      <div className="pointer-events-none absolute bottom-5 left-5 z-10 max-w-[68vw] md:bottom-8 md:left-8 md:max-w-sm">
+        <p className="font-mono text-[11px] text-(--ink) tracking-[0.18em]">
+          {activeArtwork.englishTitle}
         </p>
-      </dialog>
+        <p className="mt-2 text-(--ink-soft) text-sm leading-6">{activeArtwork.summary}</p>
+        <p className="mt-3 font-mono text-[10px] text-(--ink-soft) tracking-[0.08em]">
+          {activeArtwork.time} · {activeArtwork.dimensions}
+        </p>
+      </div>
+
+      {/* 印章：作品编号 */}
+      <span
+        className={cn(styles.seal, "absolute right-5 bottom-5 z-10 md:right-8 md:bottom-8")}
+        aria-hidden="true"
+      >
+        {activeArtwork.id}
+      </span>
+
+      {/* 键盘提示 */}
+      <p
+        className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 font-mono text-[10px] text-(--ink-soft) tracking-[0.1em] lg:block"
+        aria-hidden="true"
+      >
+        ← → 切换 · I 索引 · P 配方
+      </p>
+
+      {/* 边缘导航 */}
+      <button
+        className="group absolute inset-y-0 left-0 z-20 grid w-12 cursor-pointer place-items-center disabled:cursor-default md:w-20"
+        type="button"
+        disabled={isFirst}
+        onClick={() => selectArtwork(activeIndex - 1)}
+        aria-label={previousArtwork ? `上一件：${previousArtwork.title}` : "没有上一件作品"}
+      >
+        <span className="grid size-10 place-items-center rounded-full border border-(--hairline) text-(--ink) opacity-0 transition-opacity group-hover:opacity-100 group-disabled:opacity-0 max-md:opacity-60">
+          <ArrowLeft aria-hidden="true" size={18} />
+        </span>
+      </button>
+      <button
+        className="group absolute inset-y-0 right-0 z-20 grid w-12 cursor-pointer place-items-center disabled:cursor-default md:w-20"
+        type="button"
+        disabled={isLast}
+        onClick={() => selectArtwork(activeIndex + 1)}
+        aria-label={nextArtwork ? `下一件：${nextArtwork.title}` : "没有下一件作品"}
+      >
+        <span className="grid size-10 place-items-center rounded-full border border-(--hairline) text-(--ink) opacity-0 transition-opacity group-hover:opacity-100 group-disabled:opacity-0 max-md:opacity-60">
+          <ArrowRight aria-hidden="true" size={18} />
+        </span>
+      </button>
+
+      <ArtworkVerso ref={versoRef} artwork={activeArtwork} />
+      <ArtworkIndex
+        ref={indexRef}
+        artworks={artworks}
+        activeIndex={activeIndex}
+        onSelect={selectArtwork}
+      />
     </div>
   )
 }
