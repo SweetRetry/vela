@@ -1,19 +1,22 @@
+export type ArtworkMedia =
+  | { kind: "image"; src: string; alt: string }
+  | { kind: "video"; src: string; poster: string; alt: string; duration?: string }
+
 export type Artwork = {
   id: string
   slug: string
   title: string
   englishTitle: string
-  image: string
-  alt: string
   time: string
   dimensions: string
   summary: string
   originalPrompt: string
   /** 画面主色调，决定叠加在作品上的文字与控件用墨黑还是暖白 */
   tone: "light" | "dark"
+  /** 所属系列；缺省时索引按介质分区 */
+  series?: string
+  media: ArtworkMedia
 }
-
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 
 export const artworks = [
   {
@@ -21,12 +24,15 @@ export const artworks = [
     slug: "unbound-bloom",
     title: "挣脱盛放",
     englishTitle: "UNBOUND BLOOM",
-    image: `${basePath}/works/unbound-bloom.webp`,
-    alt: "暖白背景上，一束珊瑚红、洋红与橙色花朵从深绿色茎叶中向外舒展",
     time: "2026/07/31",
     dimensions: "3840 × 2160 px",
     summary: "从紧束的深绿根部向外爆发。花冠不是被摆放的静物，而是一股正在越过画框的生命冲动。",
     tone: "light",
+    media: {
+      kind: "image",
+      src: "/works/unbound-bloom.webp",
+      alt: "暖白背景上，一束珊瑚红、洋红与橙色花朵从深绿色茎叶中向外舒展",
+    },
     originalPrompt: `## 平面核心
 
 设计主轴：一束花像刚刚挣脱束缚的生命体，从紧束的根部向四周猛烈舒展；饱满花冠形成上升的火焰轮廓，一枝细长花茎越过整体节奏向右上方探出，成为充满生命冲动的记忆点。
@@ -54,13 +60,16 @@ export const artworks = [
     slug: "rootless",
     title: "无根",
     englishTitle: "ROOTLESS",
-    image: `${basePath}/works/rootless-tiger.webp`,
-    alt: "水墨飞溅的暖棕空间里，持棍武士背对画面，与上方扑压而来的巨虎对峙",
     time: "2026/07/31",
     dimensions: "3840 × 2160 px",
     summary:
       "猛虎从上方压迫画面，武士以低姿态横棍迎击。暖棕、墨黑与局部朱红把空间压缩成一记正在爆发的水墨笔触。",
     tone: "dark",
+    media: {
+      kind: "image",
+      src: "/works/rootless-tiger.webp",
+      alt: "水墨飞溅的暖棕空间里，持棍武士背对画面，与上方扑压而来的巨虎对峙",
+    },
     originalPrompt: `## 整体风格
 
 东方写意水墨数字插画。以低饱和暖棕、黑白灰为主色调，局部使用朱红点缀。强烈的后方逆光，明暗对比鲜明。
@@ -79,7 +88,7 @@ export const artworks = [
 
 ## 镜头与构图
 
-16:9 横幅，极低视角仰拍，采用具有强烈张力的对角线构图。
+9:16 竖幅，极低视角仰拍，采用具有强烈张力的对角线构图。
 
 ## 画面质感
 

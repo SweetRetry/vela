@@ -129,27 +129,6 @@
   animation: layer-in 300ms ease-out;
 }
 
-/* Index：档案抽屉，深色满版列表 */
-.indexDialog {
-  width: 100vw;
-  max-width: none;
-  height: 100svh;
-  max-height: none;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: oklch(0.16 0.012 70);
-  color: oklch(0.93 0.015 90);
-}
-
-.indexDialog::backdrop {
-  background: rgb(24 20 16 / 0.55);
-}
-
-.indexDialog[open] {
-  animation: layer-in 300ms ease-out;
-}
-
 .scrollBody {
   scrollbar-color: var(--color-border) transparent;
   scrollbar-width: thin;
@@ -195,8 +174,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .stage,
-  .verso[open],
-  .indexDialog[open] {
+  .verso[open] {
     animation: none;
   }
 }

@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react"
 import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
 
-import { ArtworkIndex } from "@/components/artwork-index"
+import { ArchiveGrid } from "@/components/archive-grid"
 import { ArtworkVerso } from "@/components/artwork-verso"
 import type { Artwork } from "@/lib/artworks"
 
@@ -19,36 +19,51 @@ type PortfolioViewerProps = {
 }
 
 export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
+  const [view, setView] = useState<"browse" | "work">("browse")
   const [activeIndex, setActiveIndex] = useState(0)
   const versoRef = useRef<HTMLDialogElement>(null)
-  const indexRef = useRef<HTMLDialogElement>(null)
   const activeArtwork = artworks[activeIndex]
 
-  const selectArtwork = useCallback(
-    (index: number) => {
+  /** push：从索引进入，留历史记录让浏览器后退可以回到档案架；replace：展线内切换 */
+  const openArtwork = useCallback(
+    (index: number, { push = false }: { push?: boolean } = {}) => {
       const nextArtwork = artworks[index]
       if (!nextArtwork) {
         return
       }
 
       setActiveIndex(index)
-      window.history.replaceState(null, "", `#${nextArtwork.slug}`)
+      setView("work")
+      const url = `#${nextArtwork.slug}`
+      if (push) {
+        window.history.pushState(null, "", url)
+      } else {
+        window.history.replaceState(null, "", url)
+      }
     },
     [artworks]
   )
 
+  const goToBrowse = useCallback(() => {
+    setView("browse")
+    window.history.pushState(null, "", window.location.pathname + window.location.search)
+  }, [])
+
   useEffect(() => {
-    const selectFromHash = () => {
+    const syncFromHash = () => {
       const slug = window.location.hash.slice(1)
       const index = artworks.findIndex((artwork) => artwork.slug === slug)
       if (index >= 0) {
         setActiveIndex(index)
+        setView("work")
+      } else {
+        setView("browse")
       }
     }
 
-    selectFromHash()
-    window.addEventListener("hashchange", selectFromHash)
-    return () => window.removeEventListener("hashchange", selectFromHash)
+    syncFromHash()
+    window.addEventListener("hashchange", syncFromHash)
+    return () => window.removeEventListener("hashchange", syncFromHash)
   }, [artworks])
 
   useEffect(() => {
@@ -57,17 +72,21 @@ export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
         return
       }
 
-      // 阅读层打开时，方向键留给滚动与 Esc
-      if (versoRef.current?.open || indexRef.current?.open) {
+      // 阅读层打开时，按键留给滚动与 Esc
+      if (versoRef.current?.open) {
+        return
+      }
+
+      if (view === "browse") {
         return
       }
 
       if (event.key === "ArrowLeft") {
-        selectArtwork(activeIndex - 1)
+        openArtwork(activeIndex - 1)
       } else if (event.key === "ArrowRight") {
-        selectArtwork(activeIndex + 1)
-      } else if (event.key === "i" || event.key === "I") {
-        indexRef.current?.showModal()
+        openArtwork(activeIndex + 1)
+      } else if (event.key === "Escape" || event.key === "i" || event.key === "I") {
+        goToBrowse()
       } else if (event.key === "p" || event.key === "P") {
         versoRef.current?.showModal()
       }
@@ -75,13 +94,11 @@ export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [activeIndex, selectArtwork])
+  }, [view, activeIndex, openArtwork, goToBrowse])
 
-  if (!activeArtwork) {
+  if (view === "browse" || !activeArtwork) {
     return (
-      <div className="grid h-svh place-items-center bg-background text-muted-foreground text-sm">
-        档案暂无作品。
-      </div>
+      <ArchiveGrid artworks={artworks} onOpen={(index) => openArtwork(index, { push: true })} />
     )
   }
 
@@ -90,14 +107,16 @@ export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
   const previousArtwork = artworks[activeIndex - 1]
   const nextArtwork = artworks[activeIndex + 1]
   const toneClass = activeArtwork.tone === "dark" ? styles.toneDark : styles.toneLight
+  const backdropSrc =
+    activeArtwork.media.kind === "video" ? activeArtwork.media.poster : activeArtwork.media.src
 
   return (
     <div className={cn(styles.viewer, toneClass)}>
-      {/* 环境底：作品自身放大模糊，填满画幅之外的空白 */}
+      {/* 环境底：作品自身(或视频海报)放大模糊，填满画幅之外的空白 */}
       <div className={styles.backdrop} aria-hidden="true">
         <Image
           key={`backdrop-${activeArtwork.id}`}
-          src={activeArtwork.image}
+          src={backdropSrc}
           alt=""
           fill
           sizes="100vw"
@@ -108,14 +127,28 @@ export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
 
       {/* 作品层：key 触发"洇开"转场 */}
       <figure key={activeArtwork.id} className={styles.stage}>
-        <Image
-          src={activeArtwork.image}
-          alt={activeArtwork.alt}
-          fill
-          priority
-          sizes="100vw"
-          className="object-contain"
-        />
+        {activeArtwork.media.kind === "video" ? (
+          <video
+            className="absolute inset-0 h-full w-full object-contain"
+            src={activeArtwork.media.src}
+            poster={activeArtwork.media.poster}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label={activeArtwork.media.alt}
+          />
+        ) : (
+          <Image
+            src={activeArtwork.media.src}
+            alt={activeArtwork.media.alt}
+            fill
+            priority
+            sizes="100vw"
+            className="object-contain"
+          />
+        )}
       </figure>
 
       <div className={styles.scrimTop} aria-hidden="true" />
@@ -127,8 +160,8 @@ export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
         <button
           className="cursor-pointer border-0 bg-transparent p-0 font-bold text-[21px] text-(--ink) tracking-[-0.06em] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--ink)"
           type="button"
-          onClick={() => selectArtwork(0)}
-          aria-label="返回第一件作品"
+          onClick={goToBrowse}
+          aria-label="返回作品索引"
         >
           VELA
         </button>
@@ -136,11 +169,7 @@ export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
           <span className="hidden font-mono text-[10px] text-(--ink-soft) tracking-[0.14em] sm:inline">
             {activeArtwork.id} / {String(artworks.length).padStart(3, "0")}
           </span>
-          <button
-            className={chromeButton}
-            type="button"
-            onClick={() => indexRef.current?.showModal()}
-          >
+          <button className={chromeButton} type="button" onClick={goToBrowse}>
             索引
           </button>
           <button
@@ -190,7 +219,7 @@ export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
         className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 font-mono text-[10px] text-(--ink-soft) tracking-[0.1em] lg:block"
         aria-hidden="true"
       >
-        ← → 切换 · I 索引 · P 配方
+        ← → 切换 · I 索引 · P 配方 · Esc 返回
       </p>
 
       {/* 边缘导航 */}
@@ -198,7 +227,7 @@ export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
         className="group absolute inset-y-0 left-0 z-20 grid w-12 cursor-pointer place-items-center disabled:cursor-default md:w-20"
         type="button"
         disabled={isFirst}
-        onClick={() => selectArtwork(activeIndex - 1)}
+        onClick={() => openArtwork(activeIndex - 1)}
         aria-label={previousArtwork ? `上一件：${previousArtwork.title}` : "没有上一件作品"}
       >
         <span className="grid size-10 place-items-center rounded-full border border-(--hairline) text-(--ink) opacity-0 transition-opacity group-hover:opacity-100 group-disabled:opacity-0 max-md:opacity-60">
@@ -209,7 +238,7 @@ export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
         className="group absolute inset-y-0 right-0 z-20 grid w-12 cursor-pointer place-items-center disabled:cursor-default md:w-20"
         type="button"
         disabled={isLast}
-        onClick={() => selectArtwork(activeIndex + 1)}
+        onClick={() => openArtwork(activeIndex + 1)}
         aria-label={nextArtwork ? `下一件：${nextArtwork.title}` : "没有下一件作品"}
       >
         <span className="grid size-10 place-items-center rounded-full border border-(--hairline) text-(--ink) opacity-0 transition-opacity group-hover:opacity-100 group-disabled:opacity-0 max-md:opacity-60">
@@ -218,12 +247,6 @@ export function PortfolioViewer({ artworks }: PortfolioViewerProps) {
       </button>
 
       <ArtworkVerso ref={versoRef} artwork={activeArtwork} />
-      <ArtworkIndex
-        ref={indexRef}
-        artworks={artworks}
-        activeIndex={activeIndex}
-        onSelect={selectArtwork}
-      />
     </div>
   )
 }
