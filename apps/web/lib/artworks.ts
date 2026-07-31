@@ -94,4 +94,29 @@ export const artworks = [
 
 加入运动模糊、水墨飞白和边缘颗粒感，突出猛烈冲撞与瞬间对峙的动态效果。`,
   },
+  {
+    id: "003",
+    slug: "refraction",
+    title: "折光",
+    englishTitle: "REFRACTION",
+    time: "2026/07/31",
+    dimensions: "1254 × 1254 px",
+    summary: "透明水彩把钻石切面拆成冰蓝、淡紫与微暖光谱，纤细墨线将流动色彩固定成一颗清晰的宝石。",
+    tone: "light",
+    media: {
+      kind: "image",
+      src: "/works/refraction.webp",
+      alt: "暖象牙色纸面上，一颗由冰蓝与淡紫水彩叠染、精细墨线勾勒切面的钻石",
+    },
+    originalPrompt: `stylized-concept
+Asset type: square standalone illustration
+Primary request: Create a refined poster-like image centered on one unmistakable loose brilliant-cut diamond. The diamond itself is the clear subject, not an abstract symbol.
+Scene/backdrop: warm ivory handmade paper with restrained open negative space; no environment or tabletop.
+Subject: one oversized brilliant-cut diamond seen from a slightly elevated frontal view, occupying about 65% of the square canvas. Preserve the recognizable gemstone silhouette, crown, girdle, pavilion, and many precise intersecting facets. No ring, setting, jewelry, hands, flowers, or additional gemstones.
+Style/medium: vintage mineralogical illustration rendered as transparent watercolor washes with delicate fine-line ink drawing. Layered pale ice blue, aqua, lavender, and subtle blush washes flow within the facets; thin charcoal-gray ink contours describe every facet. Visible paper absorption, soft pigment blooms, slight wash overlaps, and nuanced hand-painted irregularity. This is a 2D illustration, not photographic capture.
+Composition/framing: fixed 1:1 poster composition; diamond centered and dominant, generous ivory margins, crisp complete silhouette. A few restrained prismatic watercolor glints radiate immediately around the stone as supporting accents, never becoming separate geometric objects.
+Color/value: luminous near-white highlights, cool translucent blues and lavenders inside the diamond, sparse warm coral and gold prismatic accents, ivory background. Strong thumbnail readability and a clear dark-to-light facet rhythm.
+Rendering: compressed depth and simplified illustrative light; faceted volume remains convincing through watercolor value shifts and fine ink geometry. Elegant, tactile, hand-rendered, editorial poster quality. Preserve organic watercolor texture and precise drawing detail.
+Constraints: no text, no logo, no watermark, no border, no photorealistic studio lighting, no black background, no clean-vector flat fills, no minimalist abstract blocks.`,
+  },
 ] as const satisfies readonly Artwork[]
